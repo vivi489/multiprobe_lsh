@@ -1,0 +1,14 @@
+[{
+  "lsh_id": 0,
+  "params": {
+    "vec_dim": 512,
+    "vec_norm": 10,
+    "L": 8,
+    "K": 32,
+    "F": [3,4],
+    "bucket_limit": null
+  },
+  "data_path": "./data/qlog1M",
+  "mapper_cache": "./tmp/qlog1M",
+  "repeat": 1
+}]

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block head %}
+  {{ super() }}
+{% endblock %}
+
+{% block body %}
+  {{ super() }}
+
+  <!-- Masthead -->
+    <style>    
+    .thead_bg_color {
+      color: black;
+      background-color: #cc0000
+    }
+    .thead_text {
+        color: white
+    }
+    </style>
+
+  <div class="container">
+    <h2>People also search for...</h2>
+  </div>
+
+  <div class="container">
+  <table class="table">
+    <thead class="thead_bg_color">
+      <tr>  
+        <th class="thead_text" scope="col">#</th>
+        <th class="thead_text" scope="col">Search Query</th>
+        <th class="thead_text" scope="col">Similarity</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for i, v in candidates %}
+      <tr>
+        <th scope="row">{{ i }}</th>
+        <td>{{ v[0] }}</td>
+        <td>{{ v[1] }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <a href="./index.html" class="btn btn-secondary btn-lg btn-block" role="button">Back</a>
+</div>
+
+
+  <!-- Bootstrap core JavaScript -->
+  <script src="{{ url_for('static', filename='vendor/jquery/jquery.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+
+{% endblock %}

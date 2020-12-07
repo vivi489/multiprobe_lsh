@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block head %}
+  {{ super() }}
+{% endblock %}
+
+{% block body %}
+  {{ super() }}
+  <style>    
+    .no-padding {
+        padding-left: 0;
+        padding-right: 0;
+    }
+</style>
+<!-- Masthead -->
+<div class="container-fluid no-padding">
+    <div class="row no-padding">
+        <div class="col-md-12 no-padding">
+            <img class="img-responsive full-size no-padding" src="{{ url_for('static', filename='img/bg_img.jpg') }}"/>
+        </div>
+    </div>
+</div>
+<header class="text-black text-center">
+<div class="container">
+  <div class="row">
+    <div class="col-xl-9 mx-auto">
+      <img class="img-fluid img-center" src="https://r.r10s.jp/com/img/home/logo/ogp.png"  style="width: 15%;">
+      <p class="mb-1">DEMO ONLY!</p>
+    </div>
+    
+
+
+
+    <div class="col-md-10 col-lg-8 col-xl-7 mx-auto">
+      <form method="post" action="{{ url_for('send') }}">
+        <div class="form-row">
+            <div class="col-12 col-md-3">
+                <img class="img-fluid img-center" src="https://r.r10s.jp/com/img/thumb/header/logo_rakuten_socialdistance_6.svg">
+            </div>
+          <div class="col-12 col-md-6">
+            <input class="form-control" name="search-query" placeholder="キーワード検索">
+          </div>
+          <div class="col-12 col-md-3">
+            <button type="submit" class="btn btn-block btn btn-danger">🔍</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="container-fluid no-padding"><p/></div>
+    
+    <div class="container-fluid no-padding">
+      <div class="row no-padding">
+        <a href="https://rd.rakuten.co.jp/s/?R2=https%3A%2F%2Fac.ebis.ne.jp%2Ftr_set.php%3Fargument%3DZMhPE4GP%26ai%3Drgp_mno_000946&amp;D2=3.8611.68708.911622.32381064&amp;C3=e67b9b81943cc8caa1494a0fd6f9e803b854804f" style="display: block; width: 100%;">
+          <p style="width: 100%; height: 50px; background: url('https://r.r10s.jp/com/img/thumb/200309/message/flash/mno/20201013_mno_1890x50_pc_01.jpg') no-repeat; background-position: top center;"></p>
+        </a>
+      </div>
+    </div>
+
+  </div>
+</div>
+</header>
+
+<!-- Bootstrap core JavaScript -->
+<script src="{{ url_for('static', filename='vendor/jquery/jquery.min.js') }}"></script>
+<script src="{{ url_for('static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,13 @@
+[{
+  "lsh_id": 1,
+  "params": {
+    "vec_dim": 256,
+    "vec_norm": 10,
+    "L": [12, 10, 8],
+    "K": 14,
+    "F": [5,6,7,8],
+    "bucket_limit": null
+  },
+  "data_path": "./data/random100k",
+  "repeat": 1
+}]
