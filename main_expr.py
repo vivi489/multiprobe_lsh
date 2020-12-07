@@ -188,13 +188,5 @@ def main(argv):
                 experiment(data_path, lsh_params, lsh_id, mapper)
                 mapper.reset()
 
-
-# lsh = HyperplaneFlippingLSH(vec_dim=DIM, vec_norm=10, L=10, K=8, F=4, bucket_limit=None)
-# lsh = CrossPolytopeLSH(vec_dim=DIM, vec_norm=10, L=40, K=1, bucket_limit=65535)
-# lsh = MultiprobeCrossPolytopeLSH(vec_dim=DIM, vec_norm=10, L=10, M=4, lookup=1, bucket_limit=65535)
-# lsh = StochasticHyperplaneLSH(vec_dim=DIM, vec_norm=10, L=10, K=8, F=4, weights=weights, bucket_limit=None)
-# shutil.rmtree('./tmp/feature_map', ignore_errors=True)
-# feature_map = DBDictionary('./tmp/feature_map')
-
 if __name__ == "__main__":
     main(sys.argv[1: ])
