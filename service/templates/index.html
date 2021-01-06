@@ -29,19 +29,20 @@
     </div>
     
 
-
-
-    <div class="col-md-10 col-lg-8 col-xl-7 mx-auto">
+    <div class="container-fluid">
       <form method="post" action="{{ url_for('send') }}">
         <div class="form-row">
             <div class="col-12 col-md-3">
                 <img class="img-fluid img-center" src="https://r.r10s.jp/com/img/thumb/header/logo_rakuten_socialdistance_6.svg">
             </div>
-          <div class="col-12 col-md-6">
-            <input class="form-control" name="search-query" placeholder="キーワード検索">
+          <div class="col-12 col-md-5">
+            <input type="text" id="search_field" class="form-control" name="search-query" placeholder="キーワード検索">
           </div>
-          <div class="col-12 col-md-3">
+          <div class="col-12 col-md-2">
             <button type="submit" class="btn btn-block btn btn-danger">🔍</button>
+          </div>
+          <div class="col-12 col-md-2">
+            <button type="button" id="btn_sample_query" class="btn btn-block btn btn-danger">Pick For Me</button>
           </div>
         </div>
       </form>
@@ -64,4 +65,18 @@
 <!-- Bootstrap core JavaScript -->
 <script src="{{ url_for('static', filename='vendor/jquery/jquery.min.js') }}"></script>
 <script src="{{ url_for('static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+<script>
+  $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+  $('#btn_sample_query').click(function() {
+    // $('#search_field').val("any thing here");
+    $.ajax({
+        type: "GET",
+        url: $SCRIPT_ROOT + "_pickone",
+        dataType: 'json',
+        success: function(data) {
+            $('#search_field').val(data.value);
+        }
+      });
+    });
+</script>
 {% endblock %}

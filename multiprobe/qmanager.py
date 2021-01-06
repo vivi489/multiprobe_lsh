@@ -158,6 +158,7 @@ class QuerySQLiteMapper(QueryMapper):
         self.path_feature_map = path_feature_map
         self._knn_comparison_count = 0
         self._feature_map = SqliteDict(self.path_feature_map, journal_mode="OFF")
+        self.bucket_map_index = 0
 
     @property
     def knn_comparison_count(self):
@@ -188,40 +189,35 @@ class QuerySQLiteMapper(QueryMapper):
             for k, v in self.q2sig.items():
                 sql_q2sig[k] = v
             sql_q2sig.commit()
+            self.q2sig = defaultdict(set)
         with SqliteDict(
-            self.path_sig2buckets, autocommit=False) as sql_sig2buckets:
+            f"{self.path_sig2buckets}-{self.bucket_map_index:04d}.sqldict", 
+            autocommit=False) as sql_sig2buckets:
             for k, v in self.sig2buckets.items():
                 cur_bucket = sql_sig2buckets.get(k, None)
                 if cur_bucket is not None:
                     self.sig2buckets[k].update(cur_bucket)
                 sql_sig2buckets[k] = v
             sql_sig2buckets.commit()
-        self.q2sig = defaultdict(set)
+        self.bucket_map_index += 1
         self.sig2buckets = defaultdict(set)
 
     def lookup_candidates(self, qkey, lbd=0.7):
-        candidates = set()
-        with SqliteDict(self.path_q2sig) as sql_q2sig:
-            sigs = sql_q2sig[qkey]
-        fmap = self.feature_map
-        with SqliteDict(self.path_sig2buckets) as sql_sig2buckets:
-            for sig in sigs:
-                bucket = sql_sig2buckets[sig]
-                bucket = filter(
-                    lambda q: QueryMapper.pairwise_cosine_similarity(
-                        fmap[q], fmap[qkey]) >= lbd,
-                    bucket)
-                candidates.update(sql_sig2buckets[sig])
-        return list(candidates)
+        raise NotImplementedError
 
     def lookup_knn(self, qkey, top_k=10):
         candidates = SortedSet(key=lambda t: (-t[1], t[0]))
-        with SqliteDict(self.path_q2sig) as sql_q2sig:
+        with DBDictionary(self.path_q2sig, read_only=True) as sql_q2sig:
             sigs = sql_q2sig[qkey]
         fmap = self.feature_map
-        with SqliteDict(self.path_sig2buckets) as sql_sig2buckets:
+        bucket_maps = []
+        for path in glob.glob(f"{self.path_sig2buckets}*"):
+            bucket_maps.append(
+                DBDictionary(path, read_only=True))
+        for db_sig2buckets in bucket_maps:
             for sig in sigs:
-                bucket = sql_sig2buckets[sig]
+                bucket = db_sig2buckets.get(sig, None)
+                if bucket is None: continue
                 self._knn_comparison_count += len(bucket)
                 for q in bucket:
                     if q == qkey:
@@ -229,15 +225,23 @@ class QuerySQLiteMapper(QueryMapper):
                     sim = QueryMapper.pairwise_cosine_similarity(
                         fmap[q], fmap[qkey])
                     candidates.add((q, sim))
-            candidates = candidates[: top_k]
+        candidates = candidates[: top_k]
+        for db_sig2buckets in bucket_maps:
+            db_sig2buckets.close() 
         return candidates
 
     def bucket_statistics(self):
-        with SqliteDict(self.path_sig2buckets) as sql_sig2buckets:
-            bucket_sizes = [len(v) for v in sql_sig2buckets.values()]
-            avg_size = sum(bucket_sizes) / len(bucket_sizes)
-            max_size = max(bucket_sizes)
-            min_size = min(bucket_sizes)
+        bucket_maps = []
+        bucket_sizes = []
+        for path in glob.glob(f"{self.path_sig2buckets}*"):
+            bucket_maps.append(SqliteDict(path))
+        for db_sig2buckets in bucket_maps:
+            bucket_sizes.extend([len(v) for v in db_sig2buckets.values()])
+        for db_sig2buckets in bucket_maps:
+            db_sig2buckets.close()
+        avg_size = sum(bucket_sizes) / len(bucket_sizes)
+        max_size = max(bucket_sizes)
+        min_size = min(bucket_sizes)
         return len(bucket_sizes), avg_size, max_size, min_size
 
     def __del__(self):

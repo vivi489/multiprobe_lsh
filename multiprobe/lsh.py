@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from itertools import repeat
+from scipy.special import expit
 
 import numpy as np
 import scipy.linalg as linalg
@@ -109,8 +110,8 @@ class HplaneFlipQLSH(HplaneLSH):
         
     def _expand_sig(self, t):
         sign, distance_rank = t
-        ret = []
-        for f in range(self.F):
+        ret = [sign.astype(np.int8)]
+        for f in range(self.F - 1):
             sign_vec = sign.copy()
             sign_vec[distance_rank[f]] = ~sign_vec[distance_rank[f]]
             ret.append(sign_vec.astype(np.int8))
@@ -128,7 +129,8 @@ class HplaneFlipQLSH(HplaneLSH):
             expanded_sigs.extend(expanded_sig)
         # an (F*N_queries) * K matrix
         assert len(expanded_sigs) == self.F * len(queries), \
-            "shape assertion failed: (F*N_queries) * K matrix"
+            "shape assertion failed: (F*N_queries) * K matrix, %d, %d"\
+            %(len(expanded_sigs), self.F * len(queries))
         return np.vstack(expanded_sigs)
 
     # returns a (self.F*self.L) * N_queries 2D list of str
@@ -311,7 +313,6 @@ class DWiseHplaneLSH(HplaneFlipQLSH):
             self._flip_prob_from_entropy(), vec_dim)
         super().__init__(
             vec_dim=vec_dim, vec_norm=vec_norm, L=L, K=K, F=F, bucket_limit=bucket_limit)
-        
 
     def _expand_sig(self, t):
         sign, distance_rank = t
@@ -324,7 +325,7 @@ class DWiseHplaneLSH(HplaneFlipQLSH):
         
     def _flip_prob_from_entropy(self):
         entropies = np.log(self.variances * math.sqrt(2 * math.pi * math.exp(1)))
-        prob = entropies / entropies.max()
+        prob = expit(entropies)
         return prob
 
     def _flip_mask(self, prob, vec_dim):
@@ -350,7 +351,7 @@ class DWiseHplaneLSH(HplaneFlipQLSH):
             partial_norm = math.sqrt(self.vec_norm**2 - fixed_coordinate**2)
             hplane /= linalg.norm(hplane) / partial_norm
             hplane = np.hstack([hplane[: r], [fixed_coordinate], hplane[r: ]])
-            i = self.varrank[-1]
+            # i = self.varrank[-1]
             # hplane[i] = -hplane[i]
             hplane = hplane * self.flip_mask
             hplanes.append(hplane)

@@ -114,7 +114,7 @@ class QueryDataGenerator:
         self.dir = dir
 
     @staticmethod
-    def retrieve_query_db(cursor, feature_hasher, data_size, data_dir):
+    def retrieve_query_db(cursor, feature_hasher, search_results: bool, data_size, data_dir):
         Path(data_dir).mkdir(parents=True, exist_ok=True)
         qlog_table_size = None
         for row in cursor.execute("SELECT COUNT(*) FROM query_log_table"):
@@ -128,7 +128,7 @@ class QueryDataGenerator:
                 feature_vectors = []
                 for _, row in df.iterrows():
                     vec = feature_hasher.digest(
-                        json.loads(row["search_results"]), 
+                        None if not search_results else json.loads(row["search_results"]),
                         json.loads(row["clicks"])
                     )
                     if vec is not None:

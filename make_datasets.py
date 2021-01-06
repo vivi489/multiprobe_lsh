@@ -15,14 +15,16 @@ def make_random_dataset(
     eval_size=100, dataset_dir="./tmp/randomXXX"):
     rgen = RandomDataGenerator(data_size, vec_norm, vec_dim, eval_size, dir=dataset_dir)
     rgen.generate_points()
-    rgen.create_ground_truth(top_k=100)
+    if eval_size > 0:
+        rgen.create_ground_truth(top_k=100)
 
 
 def make_query_dataset(cursor, feature_hasher, data_size, eval_size, data_dir="./tmp/qlogXXX"):
     if not os.path.exists(data_dir):
-        QueryDataGenerator.retrieve_query_db(cursor, feature_hasher, data_size, data_dir)
+        QueryDataGenerator.retrieve_query_db(cursor, feature_hasher, False, data_size, data_dir)
     qgen = QueryDataGenerator(data_dir)
-    qgen.create_ground_truth(eval_size=eval_size, top_k=100)
+    if eval_size > 0:
+        qgen.create_ground_truth(eval_size=eval_size, top_k=100)
 
 
 def main():
@@ -42,7 +44,7 @@ def main():
         make_random_dataset(args.data_size, 10.0, 256, args.eval_size, args.data_dir)
     if args.dtype.startswith('q'):
         hasher = QFeatureHasher(
-            dim1=256, dim2=256, 
+            dim1=None, dim2=256, 
             catdict=pickle.load(open("./data/catdict.pickle", 'rb'))
         )
         conn = sqlite3.connect(args.qlog_path)
